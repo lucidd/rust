@@ -1331,7 +1331,7 @@ fn blank<'a>(s: Option<&'a str>) -> &'a str {
 fn shorter<'a>(s: Option<&'a str>) -> &'a str {
     match s {
         Some(s) => match s.find_str("\n\n") {
-            Some(pos) => s.slice_to(pos),
+            Some(pos) => s.slice_to(pos).unwrap(),
             None => s,
         },
         None => ""

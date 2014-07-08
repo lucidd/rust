@@ -206,20 +206,20 @@ impl GenericPathUnsafe for Path {
             }
             Some((_,idxa,end)) if self.repr.as_slice().slice(idxa,end) == ".." => {
                 let mut s = String::with_capacity(end + 1 + filename.len());
-                s.push_str(self.repr.as_slice().slice_to(end));
+                s.push_str(self.repr.as_slice().slice_to(end).unwrap());
                 s.push_char(SEP);
                 s.push_str(filename);
                 self.update_normalized(s);
             }
             Some((idxb,idxa,_)) if self.prefix == Some(DiskPrefix) && idxa == self.prefix_len() => {
                 let mut s = String::with_capacity(idxb + filename.len());
-                s.push_str(self.repr.as_slice().slice_to(idxb));
+                s.push_str(self.repr.as_slice().slice_to(idxb).unwrap());
                 s.push_str(filename);
                 self.update_normalized(s);
             }
             Some((idxb,_,_)) => {
                 let mut s = String::with_capacity(idxb + 1 + filename.len());
-                s.push_str(self.repr.as_slice().slice_to(idxb));
+                s.push_str(self.repr.as_slice().slice_to(idxb).unwrap());
                 s.push_char(SEP);
                 s.push_str(filename);
                 self.update_normalized(s);
@@ -376,13 +376,13 @@ impl GenericPath for Path {
             Some((idxb,_,end)) if self.repr.as_slice().slice(idxb, end) == "\\" => {
                 self.repr.as_slice()
             }
-            Some((0,idxa,_)) => self.repr.as_slice().slice_to(idxa),
+            Some((0,idxa,_)) => self.repr.as_slice().slice_to(idxa).unwrap(),
             Some((idxb,idxa,_)) => {
                 match self.prefix {
                     Some(DiskPrefix) | Some(VerbatimDiskPrefix) if idxb == self.prefix_len() => {
-                        self.repr.as_slice().slice_to(idxa)
+                        self.repr.as_slice().slice_to(idxa).unwrap()
                     }
-                    _ => self.repr.as_slice().slice_to(idxb)
+                    _ => self.repr.as_slice().slice_to(idxb).unwrap()
                 }
             }
         })
@@ -454,15 +454,15 @@ impl GenericPath for Path {
         if self.prefix.is_some() {
             Some(Path::new(match self.prefix {
                 Some(DiskPrefix) if self.is_absolute() => {
-                    self.repr.as_slice().slice_to(self.prefix_len()+1)
+                    self.repr.as_slice().slice_to(self.prefix_len()+1).unwrap()
                 }
                 Some(VerbatimDiskPrefix) => {
-                    self.repr.as_slice().slice_to(self.prefix_len()+1)
+                    self.repr.as_slice().slice_to(self.prefix_len()+1).unwrap()
                 }
-                _ => self.repr.as_slice().slice_to(self.prefix_len())
+                _ => self.repr.as_slice().slice_to(self.prefix_len()).unwrap()
             }))
         } else if is_vol_relative(self) {
-            Some(Path::new(self.repr.as_slice().slice_to(1)))
+            Some(Path::new(self.repr.as_slice().slice_to(1).unwrap()))
         } else {
             None
         }
@@ -686,7 +686,7 @@ impl Path {
             }
             (None, None) => true,
             (a, b) if a == b => {
-                s_repr.slice_to(self.prefix_len()) == o_repr.slice_to(other.prefix_len())
+                s_repr.slice_to(self.prefix_len()).unwrap() == o_repr.slice_to(other.prefix_len()).unwrap()
             }
             _ => false
         }
@@ -740,7 +740,7 @@ impl Path {
                         match prefix.unwrap() {
                             DiskPrefix => {
                                 let len = prefix_len(prefix) + is_abs as uint;
-                                let mut s = String::from_str(s.slice_to(len));
+                                let mut s = String::from_str(s.slice_to(len).unwrap());
                                 unsafe {
                                     let v = s.as_mut_vec();
                                     *v.get_mut(0) = v.get(0)
@@ -758,7 +758,7 @@ impl Path {
                             }
                             VerbatimDiskPrefix => {
                                 let len = prefix_len(prefix) + is_abs as uint;
-                                let mut s = String::from_str(s.slice_to(len));
+                                let mut s = String::from_str(s.slice_to(len).unwrap());
                                 unsafe {
                                     let v = s.as_mut_vec();
                                     *v.get_mut(4) = v.get(4).to_ascii().to_upper().to_byte();
@@ -768,14 +768,14 @@ impl Path {
                             _ => {
                                 let plen = prefix_len(prefix);
                                 if s.len() > plen {
-                                    Some(String::from_str(s.slice_to(plen)))
+                                    Some(String::from_str(s.slice_to(plen).unwrap()))
                                 } else { None }
                             }
                         }
                     } else if is_abs && comps.is_empty() {
                         Some(String::from_char(1, SEP))
                     } else {
-                        let prefix_ = s.slice_to(prefix_len(prefix));
+                        let prefix_ = s.slice_to(prefix_len(prefix)).unwrap();
                         let n = prefix_.len() +
                                 if is_abs { comps.len() } else { comps.len() - 1} +
                                 comps.iter().map(|v| v.len()).sum();
@@ -786,7 +786,7 @@ impl Path {
                                 s.push_char(':');
                             }
                             Some(VerbatimDiskPrefix) => {
-                                s.push_str(prefix_.slice_to(4));
+                                s.push_str(prefix_.slice_to(4).unwrap());
                                 s.push_char(prefix_.as_bytes()[4].to_ascii().to_upper().to_char());
                                 s.push_str(prefix_.slice_from(5));
                             }
@@ -819,7 +819,7 @@ impl Path {
 
     fn update_sepidx(&mut self) {
         let s = if self.has_nonsemantic_trailing_slash() {
-                    self.repr.as_slice().slice_to(self.repr.len()-1)
+                    self.repr.as_slice().slice_to(self.repr.len()-1).unwrap()
                 } else { self.repr.as_slice() };
         let idx = s.rfind(if !prefix_is_verbatim(self.prefix) { is_sep }
                           else { is_sep_verbatim });

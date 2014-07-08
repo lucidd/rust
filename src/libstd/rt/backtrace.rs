@@ -108,9 +108,9 @@ fn demangle(writer: &mut Writer, s: &str) -> IoResult<()> {
             while rest.char_at(0).is_digit() {
                 rest = rest.slice_from(1);
             }
-            let i: uint = from_str(s.slice_to(s.len() - rest.len())).unwrap();
+            let i: uint = from_str(s.slice_to(s.len() - rest.len()).unwrap()).unwrap();
             s = rest.slice_from(i);
-            rest = rest.slice_to(i);
+            rest = rest.slice_to(i).unwrap();
             while rest.len() > 0 {
                 if rest.starts_with("$") {
                     macro_rules! demangle(
@@ -150,7 +150,7 @@ fn demangle(writer: &mut Writer, s: &str) -> IoResult<()> {
                         None => rest.len(),
                         Some(i) => i,
                     };
-                    try!(writer.write_str(rest.slice_to(idx)));
+                    try!(writer.write_str(rest.slice_to(idx).unwrap()));
                     rest = rest.slice_from(idx);
                 }
             }
@@ -978,7 +978,7 @@ mod imp {
                 let bytes = cstr.as_bytes();
                 match cstr.as_str() {
                     Some(s) => try!(super::demangle(w, s)),
-                    None => try!(w.write(bytes.slice_to(bytes.len() - 1))),
+                    None => try!(w.write(bytes.slice_to(bytes.len() - 1).unwrap())),
                 }
             }
             try!(w.write(['\n' as u8]));

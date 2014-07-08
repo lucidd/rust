@@ -1335,7 +1335,7 @@ pub trait StrSlice<'a> {
     /// out of bounds.
     ///
     /// See also `slice`, `slice_from` and `slice_chars`.
-    fn slice_to(&self, end: uint) -> &'a str;
+    fn slice_to(&self, end: uint) -> Option<&'a str>;
 
     /// Returns a slice of the string from the character range
     /// [`begin`..`end`).
@@ -1774,9 +1774,12 @@ impl<'a> StrSlice<'a> for &'a str {
     }
 
     #[inline]
-    fn slice_to(&self, end: uint) -> &'a str {
-        assert!(self.is_char_boundary(end));
-        unsafe { raw::slice_bytes(*self, 0, end) }
+    fn slice_to(&self, end: uint) -> Option<&'a str> {
+        if self.is_char_boundary(end) {
+            Some(unsafe { raw::slice_bytes(*self, 0, end) })
+        }else{
+            None
+        }
     }
 
     fn slice_chars(&self, begin: uint, end: uint) -> &'a str {

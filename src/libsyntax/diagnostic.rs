@@ -247,7 +247,7 @@ fn print_maybe_styled(w: &mut EmitterWriter,
             // to be miscolored. We assume this is rare enough that we don't
             // have to worry about it.
             if msg.ends_with("\n") {
-                try!(t.write_str(msg.slice_to(msg.len()-1)));
+                try!(t.write_str(msg.slice_to(msg.len()-1).unwrap()));
                 try!(t.reset());
                 try!(t.write_str("\n"));
             } else {

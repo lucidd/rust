@@ -276,7 +276,7 @@ impl FileMap {
         let begin = begin.to_uint();
         let slice = self.src.as_slice().slice_from(begin);
         match slice.find('\n') {
-            Some(e) => slice.slice_to(e).to_string(),
+            Some(e) => slice.slice_to(e).unwrap().to_string(),
             None => slice.to_string()
         }
     }

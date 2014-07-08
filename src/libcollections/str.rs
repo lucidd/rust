@@ -1328,9 +1328,10 @@ mod tests {
     }
     #[test]
     fn test_slice_to() {
-        assert_eq!("abcd".slice_to(0), "");
-        assert_eq!("abcd".slice_to(2), "ab");
-        assert_eq!("abcd".slice_to(4), "abcd");
+        assert_eq!("abcd".slice_to(0), Some(""));
+        assert_eq!("abcd".slice_to(2), Some("ab"));
+        assert_eq!("abcd".slice_to(4), Some("abcd"));
+        assert_eq!("abcd".slice_to(5), None);
     }
 
     #[test]
